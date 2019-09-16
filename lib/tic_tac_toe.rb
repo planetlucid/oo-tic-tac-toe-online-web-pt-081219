@@ -1,25 +1,6 @@
-# BUNDLE!!!!!
-
-# BIN/TICTACTOE
-# This is our main executable and will be how we run our game.
-
-# LIB/TIC_TAC_TOE.RB
-# Our main TicTacToe class will be defined here with all the data and logic required to play a game of tic tac toe via instances of TicTacToe.
-
-# SPEC
-# There are three test files that should be completed in order. 01_tic_tac_toe_spec.rb sets tests for our helper methods within TicTacToe. 02_play_spec.rb tests the main #play method. 03_cli_spec.rb tests the CLI.
-
 class TicTacToe
-  def initialize(board = nil)
-    @board = board || Array.new(9, " ")
-  end
-end 
-
-# The "pipes" || = or. This is saying that if the board returns nil, return an empty array.  So, either display the current board, or a new one.
-
-# WIN_COMBINATIONS within the body of TicTacToe
-
-WIN_COMBINATIONS = [
+  attr_accessor :board
+  WIN_COMBINATIONS = [
     [0,1,2],
     [3,4,5],
     [6,7,8],
@@ -27,132 +8,90 @@ WIN_COMBINATIONS = [
     [1,4,7],
     [2,5,8],
     [0,4,8],
-    [2,4,6]
+    [6,4,2]
   ]
-  
-  #display_board: not the instance variable @board
-  
-    def display_board
-    puts " #{@board[0]} | #{@board[1]} | #{@board[2]} "
-    puts "-----------"
-    puts " #{@board[3]} | #{@board[4]} | #{@board[5]} "
-    puts "-----------"
-    puts " #{@board[6]} | #{@board[7]} | #{@board[8]} "
-  end
-  
-  # input_index
-  
-  def input_to_index(user_input)
-    user_input.to_i - 1
-  end
-  
-  # move: Note that we deleted the boar arguement, and added @ to board.  For instance, #move was move(board, position, char), but now board is intialized, so it is a characteristic of TicTacToe, no need to have it as an argument.  So, #move became simply move(position, char).
-  
-  
-  def move(position, char)
-    @board[position] = char
-  end
-# For #move to work, we need to position_taken and valid_move
-  def position_taken?(index_i)
-    ((@board[index_i] == "X") || (@board[index_i] == "O"))
+
+  def initialize()
+    @board = Array.new(9, " ")
   end
 
-  def valid_move?(index)
-    index.between?(0,8) && !position_taken?(index)
-  end
-  
-
-#turn_count
-  def turn_count
-    number_of_turns = 0
-    @board.each do |space|
-    if space == "X" || space == "O"
-        number_of_turns += 1
-    end
-  end
-  return number_of_turns
-  
-#current_player
-  def current_player
-    if turn_count % 2 == 0
-    "X"
-    else
-    "O"
-  end
- 
-#turn 
-def turn
-    puts "Please enter 1-9:"
-    input = gets.strip
-    index = input_to_index(input)
-    char = current_player
-    if valid_move?(index)
-      move(index, char)
-      display_board
-    else
+  def play
+    while !over?
       turn
     end
-end
-
-#won?
-def won?
-  WIN_COMBINATIONS.detect do |win_combo|
-    if (@board[win_combo[0]]) == "X" && (@board[win_combo[1]]) == "X" && (@board[win_combo[2]]) == "X"
-      return win_combo
-    elsif (@board[win_combo[0]]) == "O" && (@board[win_combo[1]]) == "O" && (@board[win_combo[2]]) == "O"
-      return win_combo
-    end
-      false
-  end
-end
-
-#full?
-def full?
-  @board.all?{|occupied| occupied != " "}
-end
-
-#draw
-def draw?
-  !(won?) && (full?)
-end
-
-#over?
-def over?
-  won? || full? || draw?
-end
-
-#winner?
-def winner
-  WIN_COMBINATIONS.detect do |win_combo|
-    if (@board[win_combo[0]]) == "X" && (@board[win_combo[1]]) == "X" && (@board[win_combo[2]]) == "X"
-      return "X"
-    elsif (@board[win_combo[0]]) == "O" && (@board[win_combo[1]]) == "O" && (@board[win_combo[2]]) == "O"
-      return "O"
-    else
-      nil
+    if won?
+      puts "Congratulations #{winner}!"
+    elsif draw?
+      puts "Cats Game!"
     end
   end
-end
-end
 
-#play
-def play
-  while over? == false
-    turn
+  def display_board
+    puts " #{board[0]} | #{board[1]} | #{board[2]} "
+    puts "-----------"
+    puts " #{board[3]} | #{board[4]} | #{board[5]} "
+    puts "-----------"
+    puts " #{board[6]} | #{board[7]} | #{board[8]} "
   end
-  if won?
-    puts "Congratulations #{winner}!"
-  elsif draw?
-    puts "Cat's Game!"
+
+  def turn
+    display_board
+    puts "Please enter 1-9:"
+    input = gets.strip
+    if !valid_move?(input)
+      turn
+    end
+    move(input, current_player)
+    display_board
+  end
+
+  def valid_move?(input)
+    input.to_i.between?(1,9) && !position_taken?(input.to_i-1)
+  end
+
+  def current_player
+    turn_count % 2 == 0 ? "X" : "O"
+  end
+
+  def full?
+    @board.all?{|token| token == "X" || token == "O"}
+  end
+
+  def over?
+    won? || draw?
+  end
+
+  def turn_count
+    @board.count{|token| token == "X" || token == "O"}
+  end
+
+  def move(location, token)
+    @board[location.to_i-1] = token
+  end
+
+  def won?
+    WIN_COMBINATIONS.detect do |combo|
+      position(combo[0]) == position(combo[1]) &&
+      position(combo[1]) == position(combo[2]) &&
+      position_taken?(combo[0])
+    end
+  end
+
+  def draw?
+    !won? && @board.all?{|token| token == "X" || token == "O"}
+  end
+
+  def winner
+    if winning_combo = won?
+      @winner = position(winning_combo.first)
+    end
+  end
+
+  def position(location)
+    @board[location.to_i]
+  end
+
+  def position_taken?(location)
+    !(position(location).nil? || position(location) == " ")
   end
 end
-
-end
-
-
-#bin/tictactoe
-#require 'pry'
-#require_relative '../lib/tic_tac_toe.rb'
-
-#game = TicTacToe.new
-#game.play
