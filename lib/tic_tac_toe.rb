@@ -94,5 +94,5 @@ class TicTacToe
 
   def position_taken?(location)
     !(position(location).nil? || position(location) == " ")
-  end
+  end'
 end
