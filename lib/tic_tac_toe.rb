@@ -26,7 +26,6 @@ class TicTacToe
     end
   end
   
-  
   def display_board
     puts " #{board[0]} | #{board[1]} | #{board[2]} "
     puts "-----------"
@@ -80,6 +79,7 @@ class TicTacToe
 
   def draw?
     !won? && @board.all?{|token| token == "X" || token == "O"}
+    puts "Cats Game!"
   end
 
   def winner
