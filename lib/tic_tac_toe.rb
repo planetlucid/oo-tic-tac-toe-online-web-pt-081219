@@ -79,7 +79,7 @@ class TicTacToe
 
   def draw?
     !won? && @board.all?{|token| token == "X" || token == "O"}
-    puts "Cats Game!"
+    print "Cats Game!"
   end
 
   def winner
